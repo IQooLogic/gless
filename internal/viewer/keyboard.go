@@ -94,6 +94,8 @@ func (v *Viewer) processInput(input []byte) {
 			v.previousSearchResult()
 		case '#': // Toggle line numbers
 			v.showLineNumbers = !v.showLineNumbers
+		case 0x1b: // Esc - Clear search
+			v.clearSearch()
 		case 0x03: // Ctrl+C
 			v.quit = true
 		}
@@ -124,6 +126,7 @@ func (v *Viewer) showHelp() {
 		"    /              Enter search mode",
 		"    n              Next search result",
 		"    N              Previous search result",
+		"    Esc            Clear search",
 		"",
 		"  Display:",
 		"    #              Toggle line numbers",
@@ -233,4 +236,11 @@ func (v *Viewer) previousSearchResult() {
 	}
 
 	v.GoToLine(v.searchResults[v.currentResult])
+}
+
+// clearSearch clears the current search
+func (v *Viewer) clearSearch() {
+	v.searchTerm = ""
+	v.searchResults = []int{}
+	v.currentResult = -1
 }
