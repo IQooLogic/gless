@@ -1,0 +1,30 @@
+[INFO] Starting application...
+[DEBUG] Loading configuration from config.yaml
+[WARN] Configuration file not found, using defaults
+[INFO] Connecting to database at localhost:5432
+[ERROR] Failed to connect: Connection refused
+[WARN] Retrying in 5 seconds...
+[INFO] Connection successful
+[TRACE] Query executed: SELECT * FROM users WHERE id=1
+[INFO] User authenticated: john.doe@example.com
+[DEBUG] Session ID: abc123def456
+[INFO] Starting HTTP server on http://localhost:8080
+
+=== Request Log ===
+2024-01-27 10:15:32 GET /api/users 200 45ms
+2024-01-27 10:15:33 POST /api/login 401 12ms
+2024-01-27 10:15:34 GET /api/products 200 78ms
+2024-01-27 10:15:35 DELETE /api/users/5 403 5ms
+
+!!! CRITICAL ERROR !!!
+Stack trace:
+  at handleRequest (server.js:42:15)
+  at processRequest (router.js:128:9)
+  at Server.handle (http.js:456:12)
+
+Application recovered and running normally
+[INFO] Health check: OK
+[DEBUG] Memory usage: 128MB / 512MB
+[INFO] Active connections: 42
+
+Application log ends here...

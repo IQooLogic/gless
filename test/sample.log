@@ -1,0 +1,30 @@
+[1;32m[INFO][0m Starting application...
+[1;34m[DEBUG][0m Loading configuration from config.yaml
+[1;33m[WARN][0m Configuration file not found, using defaults
+[1;32m[INFO][0m Connecting to database at [4mlocalhost:5432[0m
+[1;31m[ERROR][0m Failed to connect: Connection refused
+[1;33m[WARN][0m Retrying in 5 seconds...
+[1;32m[INFO][0m Connection successful
+[1;36m[TRACE][0m Query executed: SELECT * FROM users WHERE id=1
+[1;32m[INFO][0m User authenticated: [1;95mjohn.doe@example.com[0m
+[1;34m[DEBUG][0m Session ID: [2;37mabc123def456[0m
+[1;32m[INFO][0m Starting HTTP server on [1;4;33mhttp://localhost:8080[0m
+
+[1;46;30m=== Request Log ===[0m
+[90m2024-01-27 10:15:32[0m [1;32mGET[0m /api/users [1;32m200[0m 45ms
+[90m2024-01-27 10:15:33[0m [1;33mPOST[0m /api/login [1;33m401[0m 12ms
+[90m2024-01-27 10:15:34[0m [1;32mGET[0m /api/products [1;32m200[0m 78ms
+[90m2024-01-27 10:15:35[0m [1;31mDELETE[0m /api/users/5 [1;31m403[0m 5ms
+
+[1;41;97m!!! CRITICAL ERROR !!![0m
+[1;31mStack trace:[0m
+[2;37m  at handleRequest (server.js:42:15)[0m
+[2;37m  at processRequest (router.js:128:9)[0m
+[2;37m  at Server.handle (http.js:456:12)[0m
+
+[7;32m Application recovered and running normally [0m
+[1;32m[INFO][0m Health check: [1;42;97m OK [0m
+[1;34m[DEBUG][0m Memory usage: [1;96m128MB[0m / [1;93m512MB[0m
+[1;32m[INFO][0m Active connections: [1;35m42[0m
+
+[3;90mApplication log ends here...[0m
