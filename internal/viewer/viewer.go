@@ -87,7 +87,12 @@ func (v *Viewer) exitRawMode() {
 
 // updateSize updates the terminal dimensions
 func (v *Viewer) updateSize() {
-	width, height, err := term.GetSize(int(os.Stdin.Fd()))
+	// Try Start with Stdout, fallback to Stdin
+	width, height, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		width, height, err = term.GetSize(int(os.Stdin.Fd()))
+	}
+
 	if err != nil {
 		v.width = 80
 		v.height = 24
@@ -114,6 +119,9 @@ func (v *Viewer) showCursor() {
 
 // render draws the current view
 func (v *Viewer) render() {
+	// Update size before rendering to handle resizes
+	v.updateSize()
+
 	// Move cursor to home position
 	fmt.Print("\x1b[H")
 
@@ -245,6 +253,29 @@ func (v *Viewer) renderStatusBar() {
 	fmt.Print("\x1b[0m") // Reset
 }
 
+// Scroll scrolls the view by the specified number of lines
+func (v *Viewer) Scroll(delta int) {
+	v.currentLine += delta
+	totalLines := v.fileReader.LineCount()
+
+	if v.currentLine < 0 {
+		v.currentLine = 0
+	}
+	maxLine := totalLines - (v.height - 1)
+	if maxLine < 0 {
+		maxLine = 0
+	}
+	if v.currentLine > maxLine {
+		v.currentLine = maxLine
+	}
+}
+
+// GoToLine moves to a specific line
+func (v *Viewer) GoToLine(line int) {
+	v.currentLine = line
+	v.Scroll(0) // Normalize bounds
+}
+
 // performSearch searches for the term in all lines
 func (v *Viewer) performSearch() {
 	v.searchResults = []SearchMatch{}
@@ -285,29 +316,6 @@ func (v *Viewer) performSearch() {
 			startIndex = absIndex + len(searchLower)
 		}
 	}
-}
-
-// Scroll scrolls the view by the specified number of lines
-func (v *Viewer) Scroll(delta int) {
-	v.currentLine += delta
-	totalLines := v.fileReader.LineCount()
-
-	if v.currentLine < 0 {
-		v.currentLine = 0
-	}
-	maxLine := totalLines - (v.height - 1)
-	if maxLine < 0 {
-		maxLine = 0
-	}
-	if v.currentLine > maxLine {
-		v.currentLine = maxLine
-	}
-}
-
-// GoToLine moves to a specific line
-func (v *Viewer) GoToLine(line int) {
-	v.currentLine = line
-	v.Scroll(0) // Normalize bounds
 }
 
 // Helper function for min
