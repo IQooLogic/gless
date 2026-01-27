@@ -49,23 +49,6 @@ make build-windows  # Windows amd64, arm64
 make help
 ```
 
-**Windows PowerShell build script:**
-```powershell
-# Build for all platforms
-.\build.ps1 -All
-
-# Build for specific platforms
-.\build.ps1 -Windows
-.\build.ps1 -Linux
-.\build.ps1 -MacOS
-
-# With version
-.\build.ps1 -All -Version 1.0.0
-
-# Help
-.\build.ps1 -Help
-```
-
 ## Usage
 
 View a file:
