@@ -209,60 +209,85 @@ func RenderSegment(seg Segment) string {
 	return fmt.Sprintf("\x1b[%sm%s\x1b[0m", strings.Join(codes, ";"), seg.Text)
 }
 
-// HighlightText highlights occurrences of searchTerm in segments
-// Returns new segments with highlighting applied (yellow background)
-func HighlightText(segments []Segment, searchTerm string) []Segment {
+// HighlightText highlights a specific occurrence of searchTerm in segments
+// matchIndex is the byte index in the stripped text where the match starts
+func HighlightText(segments []Segment, searchTerm string, targetMatchIndex int) []Segment {
 	if searchTerm == "" {
 		return segments
 	}
 
-	searchLower := strings.ToLower(searchTerm)
 	var result []Segment
+
+	// Track current position in the stripped text
+	currentPos := 0
 
 	for _, seg := range segments {
 		if seg.Text == "" {
 			continue
 		}
 
-		// Search for matches in this segment
-		textLower := strings.ToLower(seg.Text)
-		lastIndex := 0
+		segLen := len(seg.Text)
 
-		for {
-			// Find next occurrence
-			idx := strings.Index(textLower[lastIndex:], searchLower)
-			if idx == -1 {
-				// No more matches, add remaining text
-				if lastIndex < len(seg.Text) {
-					result = append(result, Segment{
-						Text:  seg.Text[lastIndex:],
-						Style: seg.Style,
-					})
-				}
-				break
+		// Check if the match is within this segment or spanning into it
+		// We are looking for the match that STARTS at targetMatchIndex
+
+		// Case 1: Match starts before this segment (shouldn't happen with our logic if we process sequentially)
+		// Case 2: Match starts in this segment
+
+		// Calculate overlap with the target match
+		// The target match spans from targetMatchIndex to targetMatchIndex + len(searchTerm)
+		// This segment spans from currentPos to currentPos + segLen
+
+		matchStart := targetMatchIndex
+		matchEnd := targetMatchIndex + len(searchTerm)
+		segStart := currentPos
+		segEnd := currentPos + segLen
+
+		// Check for intersection
+		if matchStart < segEnd && matchEnd > segStart {
+			// This segment contains part of the match
+
+			// Calculate relative indices within this segment
+			relStart := matchStart - segStart
+			if relStart < 0 {
+				relStart = 0
 			}
 
-			idx += lastIndex
+			relEnd := matchEnd - segStart
+			if relEnd > segLen {
+				relEnd = segLen
+			}
 
-			// Add text before match
-			if idx > lastIndex {
+			// Add text before match part
+			if relStart > 0 {
 				result = append(result, Segment{
-					Text:  seg.Text[lastIndex:idx],
+					Text:  seg.Text[:relStart],
 					Style: seg.Style,
 				})
 			}
 
-			// Add highlighted match
+			// Add highlighted part
 			highlightStyle := seg.Style
 			highlightStyle.BgColor = "43" // Yellow background
-			highlightStyle.FgColor = "30" // Black foreground for better contrast
+			highlightStyle.FgColor = "30" // Black foreground
 			result = append(result, Segment{
-				Text:  seg.Text[idx : idx+len(searchTerm)],
+				Text:  seg.Text[relStart:relEnd],
 				Style: highlightStyle,
 			})
 
-			lastIndex = idx + len(searchTerm)
+			// Add text after match part
+			if relEnd < segLen {
+				result = append(result, Segment{
+					Text:  seg.Text[relEnd:],
+					Style: seg.Style,
+				})
+			}
+		} else {
+			// No overlapping match, keep segment as is
+			result = append(result, seg)
 		}
+
+		currentPos += segLen
 	}
 
 	return result

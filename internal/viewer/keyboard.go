@@ -3,9 +3,7 @@ package viewer
 import (
 	"fmt"
 	"os"
-	"strings"
 
-	"github.com/iqool/gless/internal/ansi"
 	"golang.org/x/term"
 )
 
@@ -186,29 +184,24 @@ func (v *Viewer) enterSearchMode() {
 	// Jump to first result if found
 	if len(v.searchResults) > 0 {
 		v.currentResult = 0
-		v.GoToLine(v.searchResults[0])
+		v.GoToLine(v.searchResults[0].Line)
 	}
 }
 
 // performSearch searches for the term in all lines
-func (v *Viewer) performSearch() {
-	v.searchResults = []int{}
-	v.currentResult = -1
-
-	totalLines := v.fileReader.LineCount()
-	for i := 0; i < totalLines; i++ {
-		line, err := v.fileReader.GetLine(i)
-		if err != nil {
-			continue
-		}
-
-		// Search in the stripped version (without ANSI codes)
-		stripped := ansi.StripANSI(line)
-		if strings.Contains(strings.ToLower(stripped), strings.ToLower(v.searchTerm)) {
-			v.searchResults = append(v.searchResults, i)
-		}
-	}
-}
+// Note: Actual logic is in viewer.go, this is a placeholder or legacy
+// Wait, keyboard.go implements enterSearchMode which calls performSearch.
+// But performSearch IS part of Viewer... let me check viewer.go again.
+// Ah, performSearch is in viewer.go. This replacement chunk might be targeting the wrong file?
+// No, wait. performSearch is in keyboard.go in the previous view?
+// Let me double check where performSearch is defined.
+// Based on previous file views, performSearch WAS in keyboard.go lines 190+.
+// But I modified viewer.go to include performSearch.
+// Let me check if I accidentally duplicated it or if it moved.
+// In step 17, performSearch was in keyboard.go.
+// In step 168 (my recent edit), I updated performSearch in viewer.go? No, I updated viewer.go struct.
+// I think I might have confused where performSearch lives.
+// Let's look at `keyboard.go` content again.
 
 // nextSearchResult jumps to the next search result
 func (v *Viewer) nextSearchResult() {
@@ -221,7 +214,7 @@ func (v *Viewer) nextSearchResult() {
 		v.currentResult = 0
 	}
 
-	v.GoToLine(v.searchResults[v.currentResult])
+	v.GoToLine(v.searchResults[v.currentResult].Line)
 }
 
 // previousSearchResult jumps to the previous search result
@@ -235,12 +228,12 @@ func (v *Viewer) previousSearchResult() {
 		v.currentResult = len(v.searchResults) - 1
 	}
 
-	v.GoToLine(v.searchResults[v.currentResult])
+	v.GoToLine(v.searchResults[v.currentResult].Line)
 }
 
 // clearSearch clears the current search
 func (v *Viewer) clearSearch() {
 	v.searchTerm = ""
-	v.searchResults = []int{}
+	v.searchResults = []SearchMatch{}
 	v.currentResult = -1
 }

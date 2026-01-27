@@ -18,10 +18,16 @@ type Viewer struct {
 	height          int
 	terminalState   *term.State
 	searchTerm      string
-	searchResults   []int // Line numbers containing search term
-	currentResult   int   // Index in searchResults
+	searchResults   []SearchMatch // All matches found
+	currentResult   int           // Index in searchResults
 	showLineNumbers bool
 	quit            bool
+}
+
+// SearchMatch represents a specific search result occurrence
+type SearchMatch struct {
+	Line       int
+	MatchIndex int // Byte index in the stripped line where match starts
 }
 
 // NewViewer creates a new viewer for the given file
@@ -29,7 +35,7 @@ func NewViewer(fileReader *reader.FileReader) *Viewer {
 	return &Viewer{
 		fileReader:      fileReader,
 		currentLine:     0,
-		searchResults:   []int{},
+		searchResults:   []SearchMatch{},
 		currentResult:   -1,
 		showLineNumbers: false,
 		quit:            false,
@@ -151,9 +157,13 @@ func (v *Viewer) render() {
 		// Parse and render line with ANSI codes
 		segments := ansi.ParseLine(line)
 
-		// Apply search highlighting if we have a search term and this line is a match
-		if v.searchTerm != "" && v.isSearchMatch(lineNum-1) {
-			segments = ansi.HighlightText(segments, v.searchTerm)
+		// Apply search highlighting ONLY if this is the line containing the CURRENT match
+		if v.searchTerm != "" && v.currentResult >= 0 && v.currentResult < len(v.searchResults) {
+			currentMatch := v.searchResults[v.currentResult]
+			if currentMatch.Line == lineNum-1 {
+				// Only highlight the specific occurrence
+				segments = ansi.HighlightText(segments, v.searchTerm, currentMatch.MatchIndex)
+			}
 		}
 
 		for _, seg := range segments {
@@ -235,6 +245,48 @@ func (v *Viewer) renderStatusBar() {
 	fmt.Print("\x1b[0m") // Reset
 }
 
+// performSearch searches for the term in all lines
+func (v *Viewer) performSearch() {
+	v.searchResults = []SearchMatch{}
+	v.currentResult = -1
+
+	if v.searchTerm == "" {
+		return
+	}
+
+	searchLower := strings.ToLower(v.searchTerm)
+	totalLines := v.fileReader.LineCount()
+
+	for i := 0; i < totalLines; i++ {
+		line, err := v.fileReader.GetLine(i)
+		if err != nil {
+			continue
+		}
+
+		// Search in the stripped version (without ANSI codes)
+		stripped := ansi.StripANSI(line)
+		strippedLower := strings.ToLower(stripped)
+
+		// Find all occurrences in this line
+		startIndex := 0
+		for {
+			idx := strings.Index(strippedLower[startIndex:], searchLower)
+			if idx == -1 {
+				break
+			}
+
+			// Store match with absolute index in stripped line
+			absIndex := startIndex + idx
+			v.searchResults = append(v.searchResults, SearchMatch{
+				Line:       i,
+				MatchIndex: absIndex,
+			})
+
+			startIndex = absIndex + len(searchLower)
+		}
+	}
+}
+
 // Scroll scrolls the view by the specified number of lines
 func (v *Viewer) Scroll(delta int) {
 	v.currentLine += delta
@@ -256,16 +308,6 @@ func (v *Viewer) Scroll(delta int) {
 func (v *Viewer) GoToLine(line int) {
 	v.currentLine = line
 	v.Scroll(0) // Normalize bounds
-}
-
-// isSearchMatch checks if a line number is in the search results
-func (v *Viewer) isSearchMatch(lineNum int) bool {
-	for _, matchLine := range v.searchResults {
-		if matchLine == lineNum {
-			return true
-		}
-	}
-	return false
 }
 
 // Helper function for min
