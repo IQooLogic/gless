@@ -150,6 +150,12 @@ func (v *Viewer) render() {
 
 		// Parse and render line with ANSI codes
 		segments := ansi.ParseLine(line)
+
+		// Apply search highlighting if we have a search term and this line is a match
+		if v.searchTerm != "" && v.isSearchMatch(lineNum-1) {
+			segments = ansi.HighlightText(segments, v.searchTerm)
+		}
+
 		for _, seg := range segments {
 			fmt.Print(ansi.RenderSegment(seg))
 		}
@@ -212,12 +218,17 @@ func (v *Viewer) renderStatusBar() {
 	// Add help hint
 	status += " | Press 'h' for help, 'q' to quit"
 
+	// Calculate visual length (without ANSI codes) for proper padding/truncation
+	visualLen := len(ansi.StripANSI(status))
+
 	// Truncate if too long
-	if len(status) > v.width {
-		status = status[:v.width]
+	if visualLen > v.width {
+		// Need to truncate - strip ANSI, truncate, then re-apply formatting
+		stripped := ansi.StripANSI(status)
+		status = stripped[:v.width]
 	} else {
 		// Pad to full width
-		status += strings.Repeat(" ", v.width-len(status))
+		status += strings.Repeat(" ", v.width-visualLen)
 	}
 
 	fmt.Print(status)
@@ -245,6 +256,16 @@ func (v *Viewer) Scroll(delta int) {
 func (v *Viewer) GoToLine(line int) {
 	v.currentLine = line
 	v.Scroll(0) // Normalize bounds
+}
+
+// isSearchMatch checks if a line number is in the search results
+func (v *Viewer) isSearchMatch(lineNum int) bool {
+	for _, matchLine := range v.searchResults {
+		if matchLine == lineNum {
+			return true
+		}
+	}
+	return false
 }
 
 // Helper function for min
