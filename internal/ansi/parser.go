@@ -208,3 +208,62 @@ func RenderSegment(seg Segment) string {
 
 	return fmt.Sprintf("\x1b[%sm%s\x1b[0m", strings.Join(codes, ";"), seg.Text)
 }
+
+// HighlightText highlights occurrences of searchTerm in segments
+// Returns new segments with highlighting applied (yellow background)
+func HighlightText(segments []Segment, searchTerm string) []Segment {
+	if searchTerm == "" {
+		return segments
+	}
+
+	searchLower := strings.ToLower(searchTerm)
+	var result []Segment
+
+	for _, seg := range segments {
+		if seg.Text == "" {
+			continue
+		}
+
+		// Search for matches in this segment
+		textLower := strings.ToLower(seg.Text)
+		lastIndex := 0
+
+		for {
+			// Find next occurrence
+			idx := strings.Index(textLower[lastIndex:], searchLower)
+			if idx == -1 {
+				// No more matches, add remaining text
+				if lastIndex < len(seg.Text) {
+					result = append(result, Segment{
+						Text:  seg.Text[lastIndex:],
+						Style: seg.Style,
+					})
+				}
+				break
+			}
+
+			idx += lastIndex
+
+			// Add text before match
+			if idx > lastIndex {
+				result = append(result, Segment{
+					Text:  seg.Text[lastIndex:idx],
+					Style: seg.Style,
+				})
+			}
+
+			// Add highlighted match
+			highlightStyle := seg.Style
+			highlightStyle.BgColor = "43" // Yellow background
+			highlightStyle.FgColor = "30" // Black foreground for better contrast
+			result = append(result, Segment{
+				Text:  seg.Text[idx : idx+len(searchTerm)],
+				Style: highlightStyle,
+			})
+
+			lastIndex = idx + len(searchTerm)
+		}
+	}
+
+	return result
+}
