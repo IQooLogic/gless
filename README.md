@@ -1,8 +1,8 @@
 # GLess
 
-[![CI](https://github.com/iqool/gless/workflows/CI/badge.svg)](https://github.com/iqool/gless/actions/workflows/ci.yml)
-[![Release](https://github.com/iqool/gless/workflows/Release/badge.svg)](https://github.com/iqool/gless/actions/workflows/release.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/iqool/gless)](https://goreportcard.com/report/github.com/iqool/gless)
+[![CI](https://github.com/iqoologic/gless/workflows/CI/badge.svg)](https://github.com/iqoologic/gless/actions/workflows/ci.yml)
+[![Release](https://github.com/iqoologic/gless/workflows/Release/badge.svg)](https://github.com/iqoologic/gless/actions/workflows/release.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/iqoologic/gless)](https://goreportcard.com/report/github.com/iqoologic/gless)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A terminal pager like `less` but with full ANSI escape code support, perfect for viewing colorful log files.
