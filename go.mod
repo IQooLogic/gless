@@ -1,4 +1,4 @@
-module github.com/iqool/gless
+module github.com/iqoologic/gless
 
 go 1.25.6
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/iqool/gless/internal/reader"
-	"github.com/iqool/gless/internal/viewer"
+	"github.com/iqoologic/gless/internal/reader"
+	"github.com/iqoologic/gless/internal/viewer"
 )
 
 func main() {

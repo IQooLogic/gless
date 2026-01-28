@@ -32,7 +32,7 @@ go build -o gless.exe
 
 Or install directly:
 ```bash
-go install github.com/iqool/gless@latest
+go install github.com/iqoologic/gless@latest
 ```
 
 **Cross-platform builds using Makefile:**

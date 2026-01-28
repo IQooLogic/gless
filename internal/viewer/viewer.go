@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/iqool/gless/internal/ansi"
-	"github.com/iqool/gless/internal/reader"
+	"github.com/iqoologic/gless/internal/ansi"
+	"github.com/iqoologic/gless/internal/reader"
 	"golang.org/x/term"
 )
 
